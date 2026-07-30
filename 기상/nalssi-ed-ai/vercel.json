@@ -1,0 +1,19 @@
+{
+  "builds": [
+    { "src": "api/index.py", "use": "@vercel/python" },
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "outputs/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/weather/today", "dest": "api/index.py" },
+    { "src": "/score/trip", "dest": "api/index.py" },
+    { "src": "/score", "dest": "api/index.py" },
+    { "src": "/regions/search", "dest": "api/index.py" },
+    { "src": "/geocode", "dest": "api/index.py" },
+    { "src": "/weights/(.*)", "dest": "api/index.py" },
+    { "src": "/health", "dest": "api/index.py" },
+    { "src": "/trip", "status": 301, "headers": { "Location": "/?mode=trip" } },
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
+}

@@ -1,0 +1,40 @@
+### REST Client 확장(humao.rest-client)에서 각 요청 위의 "Send Request"를 누르면 호출됩니다.
+
+@host = http://localhost:8000
+
+### 서버 상태 (지역 수, 좌표 캐시 현황)
+GET {{host}}/health
+
+### 시군구 검색 — 중구는 6곳이 모두 나옵니다
+GET {{host}}/regions/search?q=중구
+
+### 시군구 검색 — 부분 이름
+GET {{host}}/regions/search?q=해운대
+
+### 계절별 가중치
+GET {{host}}/weights/summer?variant=hybrid
+
+### 여행 계획 채점 (주 경로)
+POST {{host}}/score/trip
+Content-Type: application/json
+
+{
+  "variant": "hybrid",
+  "alternatives": true,
+  "days": [
+    { "date": "2026-07-28", "regions": ["11110", "11140"] },
+    { "date": "2026-07-29", "regions": ["51150"] },
+    { "date": "2026-07-30", "regions": ["26350", "26290"] }
+  ]
+}
+
+### 스탑 기반 채점 (부 경로 — 좌표·시간대·노출도)
+POST {{host}}/score
+Content-Type: application/json
+
+{
+  "stops": [
+    { "name": "경복궁", "lat": 37.5796, "lon": 126.9770,
+      "start": "2026-07-28T09:30:00", "end": "2026-07-28T12:00:00", "exposure": "outdoor" }
+  ]
+}
