@@ -1,0 +1,111 @@
+{
+  "components": [
+    "thermal",
+    "humidity",
+    "wind",
+    "precipitation",
+    "air_quality"
+  ],
+  "missing_rule": {
+    "min_components": 2
+  },
+  "alpha_survey": {
+    "spring": 0.45,
+    "summer": 0.0,
+    "autumn": 0.25,
+    "winter": 0.3
+  },
+  "source": "DSL 26-2 기상팀 KTCI (step4_seasonal_weight_decomposition.csv 기반 data 가중치 + README 명시 hybrid 표; survey_2014_adapted는 hybrid=a*survey+(1-a)*data 역산, 여름은 a=0이라 data로 대체)",
+  "weights": {
+    "data": {
+      "spring": {
+        "thermal": 0.090247,
+        "humidity": 0.233363,
+        "wind": 0.110907,
+        "precipitation": 0.350522,
+        "air_quality": 0.21496
+      },
+      "summer": {
+        "thermal": 0.26975,
+        "humidity": 0.101385,
+        "wind": 0.202438,
+        "precipitation": 0.372433,
+        "air_quality": 0.053994
+      },
+      "autumn": {
+        "thermal": 0.050258,
+        "humidity": 0.111903,
+        "wind": 0.219968,
+        "precipitation": 0.394713,
+        "air_quality": 0.223159
+      },
+      "winter": {
+        "thermal": 0.113306,
+        "humidity": 0.20074,
+        "wind": 0.137863,
+        "precipitation": 0.313293,
+        "air_quality": 0.234797
+      }
+    },
+    "survey_2014_adapted": {
+      "spring": {
+        "thermal": 0.510177,
+        "humidity": 0.0,
+        "wind": 0.146807,
+        "precipitation": 0.343017,
+        "air_quality": 0.0
+      },
+      "summer": {
+        "thermal": 0.26975,
+        "humidity": 0.101385,
+        "wind": 0.202438,
+        "precipitation": 0.372433,
+        "air_quality": 0.053994
+      },
+      "autumn": {
+        "thermal": 0.504482,
+        "humidity": 0.000291,
+        "wind": 0.115925,
+        "precipitation": 0.379302,
+        "air_quality": 0.0
+      },
+      "winter": {
+        "thermal": 0.509162,
+        "humidity": 0.0,
+        "wind": 0.158385,
+        "precipitation": 0.332453,
+        "air_quality": 0.0
+      }
+    },
+    "hybrid": {
+      "spring": {
+        "thermal": 0.279,
+        "humidity": 0.128,
+        "wind": 0.127,
+        "precipitation": 0.347,
+        "air_quality": 0.118
+      },
+      "summer": {
+        "thermal": 0.27,
+        "humidity": 0.101,
+        "wind": 0.202,
+        "precipitation": 0.372,
+        "air_quality": 0.054
+      },
+      "autumn": {
+        "thermal": 0.164,
+        "humidity": 0.084,
+        "wind": 0.194,
+        "precipitation": 0.391,
+        "air_quality": 0.167
+      },
+      "winter": {
+        "thermal": 0.232,
+        "humidity": 0.14,
+        "wind": 0.144,
+        "precipitation": 0.319,
+        "air_quality": 0.164
+      }
+    }
+  }
+}

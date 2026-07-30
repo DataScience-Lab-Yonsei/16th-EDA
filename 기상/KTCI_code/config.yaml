@@ -1,0 +1,50 @@
+project:
+  random_seed: 42
+  input_file: data/raw/master_tourism_weather_2023_2025.csv
+  output_dir: outputs
+analysis:
+  date_column: date
+  region_code_column: signguCode
+  region_name_column: signguNm
+  target_column: visitor_total
+  stress_columns:
+    thermal: S_temp
+    humidity: S_humidity
+    wind: S_wind
+    precipitation: S_precip
+    air_quality: S_airquality
+  seasons:
+    spring: [3, 4, 5]
+    summer: [6, 7, 8]
+    autumn: [9, 10, 11]
+    winter: [12, 1, 2]
+  baseline_group: [signguCode, year, month, weekday]
+  top_bottom_quantile: 0.20
+  hybrid_alpha_grid: [0.00, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00]
+  train_years: [2023, 2024]
+  test_years: [2025]
+missing:
+  humidity_policy: weighted_available
+  haman_policy: weighted_available
+  minimum_available_components: 2
+benchmark_2014:
+  note: "원 논문의 계절별 가중치를 현재 데이터에 존재하는 공통 영역으로 재정규화한 benchmark. 원 KTCI 점수표의 완전 재현이 아님."
+  spring: {thermal: 0.4517, precipitation: 0.3044, wind: 0.1305, cloud_unavailable: 0.1135}
+  summer: {thermal: 0.4965, precipitation: 0.3273, wind: 0.0899, cloud_unavailable: 0.0862}
+  autumn: {thermal: 0.4548, precipitation: 0.3429, wind: 0.1039, cloud_unavailable: 0.0983}
+  winter: {thermal: 0.4664, precipitation: 0.3067, wind: 0.1463, cloud_unavailable: 0.0806}
+style:
+  font_family: Malgun Gothic
+  dpi: 220
+  formats: [png, svg]
+  colors:
+    data_driven: "#2F6B9A"
+    no_availability: "#3B8C6E"
+    positive_zero_no_availability: "#8A5FB5"
+    benchmark_2014: "#E07A2D"
+    hybrid: "#3B8C6E"
+    spring: "#66A88F"
+    summer: "#D65F5F"
+    autumn: "#D9A441"
+    winter: "#6574B8"
+    neutral: "#8A8F98"

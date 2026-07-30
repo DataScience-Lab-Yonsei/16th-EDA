@@ -1,0 +1,1083 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>날씨의 ED아이</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Song+Myung&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --page: #eef3fb;
+    --surface: #ffffff;
+    --ink-primary: #16150f;
+    --ink-secondary: #55534a;
+    --ink-muted: #93907f;
+    --border: rgba(22,21,15,0.10);
+    --shadow: 0 12px 32px rgba(22,21,15,0.14), 0 2px 8px rgba(22,21,15,0.08);
+    --good: #1baf7a;
+    --mid: #f5b301;
+    --bad: #d0342c;
+    --accent: #1840a5;
+    --brand-blue: #1840a5;
+    --brand-blue-light: #3a6fd8;
+    --brand-yellow: #ffe066;
+    --c-thermal: #d97a3f; --c-humidity: #2e8f96; --c-wind: #7b7fc0;
+    --c-precipitation: #2e5ea0; --c-air_quality: #a08a3d;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: var(--page);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+    color: var(--ink-primary);
+    display: flex; flex-direction: column; height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  header {
+    padding: 16px 22px; background: linear-gradient(120deg, var(--brand-blue) 0%, var(--brand-blue-light) 100%);
+    display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    z-index: 20; position: relative; box-shadow: 0 2px 12px rgba(24,64,165,0.25);
+  }
+  header .brandline { display: flex; flex-direction: column; gap: 2px; }
+  header .brand-mark {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--brand-yellow);
+  }
+  header .brand-mark b { color: #fff; }
+  header h1 {
+    font-weight: 800; color: #fff;
+    font-size: 18px; margin: 0; letter-spacing: -0.01em;
+  }
+  header .meta { font-size: 12px; color: rgba(255,255,255,0.8); font-variant-numeric: tabular-nums; }
+  header .header-actions { display: flex; align-items: center; gap: 8px; }
+  header .home-link, header .trip-link {
+    font-size: 12.5px; font-weight: 700; color: #fff; text-decoration: none;
+    border-radius: 999px; padding: 7px 14px; white-space: nowrap; border: none; cursor: pointer; font-family: inherit;
+  }
+  header .home-link { background: transparent; border: 1px solid rgba(255,255,255,0.35); }
+  header .home-link:hover { background: rgba(255,255,255,0.15); }
+  header .trip-link { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4); }
+  header .trip-link:hover { background: rgba(255,255,255,0.25); }
+
+  #mapWrap { flex: 1; position: relative; min-height: 0; }
+  #map { position: absolute; inset: 0; background: #eceae2; }
+
+  #heroCard {
+    position: absolute; z-index: 50; left: 20px; top: 20px; width: 300px;
+    background: var(--surface); border-radius: 18px; box-shadow: var(--shadow);
+    overflow: hidden; opacity: 0; transform: translateY(-8px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    border: 1px solid var(--border);
+  }
+  #heroCard.show { opacity: 1; transform: translateY(0); }
+  #heroCard .band { height: 6px; }
+  #heroCard .body { padding: 18px 20px 20px; }
+  #heroCard .eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--ink-muted); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;
+  }
+  #heroCard .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--good); animation: pulse 1.8s infinite; flex-shrink: 0; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+  #heroCard .locname { font-weight: 800; font-size: 16px; color: var(--ink-primary); margin-bottom: 12px; letter-spacing: -0.01em; }
+  #heroCard .scoreRow { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+  #heroCard .scoreNum { font-size: 52px; font-weight: 800; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  #heroCard .scoreOf { font-size: 15px; color: var(--ink-muted); font-weight: 600; }
+  #heroCard .advice { font-size: 13.5px; font-weight: 600; color: var(--ink-primary); margin-bottom: 14px; line-height: 1.4; }
+  #heroCard .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 4px; }
+  #heroCard .stats.has5 { grid-template-columns: repeat(5, 1fr); }
+  #heroCard .stat { text-align: center; padding: 8px 2px; background: var(--page); border-radius: 10px; }
+  #heroCard .stat .ic { font-size: 15px; margin-bottom: 2px; }
+  #heroCard .stat .v { font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  #heroCard .stat .l { font-size: 9.5px; color: var(--ink-muted); margin-top: 1px; }
+  #heroCard .locerr { font-size: 12.5px; color: var(--ink-secondary); line-height: 1.6; }
+
+  .panel {
+    position: absolute; z-index: 40; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; box-shadow: var(--shadow); padding: 14px 16px; font-size: 12.5px;
+  }
+  #rangePanel { right: 18px; bottom: 22px; width: 230px; }
+  #rangePanel .title { font-weight: 700; margin-bottom: 2px; font-size: 12px; display: flex; justify-content: space-between; align-items: baseline; }
+  #rangePanel .title b { font-size: 15px; color: var(--accent); font-variant-numeric: tabular-nums; }
+  #rangeSlider { width: 100%; margin: 10px 0 2px; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--border); outline: none; }
+  #rangeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 17px; height: 17px; border-radius: 50%; background: var(--surface);
+    border: 2px solid var(--accent); cursor: pointer; box-shadow: 0 1px 3px var(--border);
+  }
+  #rangeSlider::-moz-range-thumb { width: 17px; height: 17px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); cursor: pointer; }
+  #rangePanel .scale { display: flex; justify-content: space-between; color: var(--ink-muted); font-size: 10.5px; margin-bottom: 10px; }
+  #rangePanel .divider { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+  #rangePanel .bar { height: 9px; border-radius: 5px; background: linear-gradient(to right, var(--bad), var(--mid), var(--good)); margin-bottom: 4px; }
+  #rangePanel .legendscale { display: flex; justify-content: space-between; color: var(--ink-muted); font-size: 10.5px; }
+
+  #status {
+    position: absolute; left: 20px; top: 20px; z-index: 60; font-size: 12.5px; color: var(--ink-secondary);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px;
+    box-shadow: var(--shadow);
+  }
+
+  .kakao-info {
+    background: var(--surface); border-radius: 10px; padding: 10px 12px; font-size: 12px;
+    box-shadow: var(--shadow); border: 1px solid var(--border); min-width: 150px;
+  }
+  .kakao-info .n { font-weight: 800; font-size: 13.5px; margin-bottom: 4px; }
+  .kakao-info .s { font-size: 19px; font-weight: 800; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+  .kakao-info .a { font-size: 11.5px; font-weight: 600; color: var(--ink-secondary); margin-bottom: 6px; }
+  .kakao-info table td { font-size: 11px; color: var(--ink-secondary); padding: 1px 0; }
+  .kakao-info table td.v { text-align: right; font-weight: 600; color: var(--ink-primary); padding-left: 8px; }
+  .popup-wrap { display: flex; align-items: stretch; gap: 8px; }
+  .kakao-info { display: flex; flex-direction: column; }
+  .rec-panel {
+    width: 176px; background: var(--surface); border-radius: 10px; padding: 10px 10px 6px;
+    box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; flex-direction: column;
+  }
+  .rec-panel .rec-label { font-size: 10.5px; font-weight: 700; color: var(--ink-muted); margin-bottom: 6px; white-space: nowrap; }
+  .rec-panel .rec-scroller { flex: 1; overflow: hidden; }
+  .rec-panel .rec-row { height: 100%; display: flex; gap: 7px; overflow-x: auto; scroll-behavior: smooth; scrollbar-width: none; }
+  .rec-panel .rec-row::-webkit-scrollbar { display: none; }
+  .rec-panel .rec-card {
+    flex: 0 0 auto; width: 92px; display: flex; flex-direction: column; background: var(--page); border-radius: 8px; overflow: hidden;
+    border: 1px solid var(--border); text-decoration: none; color: inherit; cursor: pointer;
+  }
+  .rec-panel .rec-card:hover { border-color: var(--ink-muted); }
+  .rec-panel .rec-card .ri { width: 100%; flex: 1; min-height: 56px; object-fit: cover; display: block; background: var(--border); }
+  .rec-panel .rec-card .rn { font-size: 10.5px; font-weight: 700; color: var(--ink-primary); line-height: 1.3; padding: 5px 6px 0; }
+  .rec-panel .rec-card .rc { font-size: 9px; color: var(--ink-muted); padding: 2px 6px 6px; }
+  .rec-panel .rec-nav { display: flex; justify-content: space-between; margin-top: 6px; }
+  .rec-panel .rec-btn {
+    width: 26px; height: 22px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--page); color: var(--ink-secondary); font-size: 13px; line-height: 1;
+    cursor: pointer; font-weight: 700;
+  }
+  .rec-panel .rec-btn:hover { background: var(--border); }
+
+  /* ---------- 여행 일정 모드 패널 ---------- */
+  #tripInputPanel { left: 20px; top: 20px; width: 320px; max-height: calc(100% - 40px); overflow-y: auto; }
+  #tripResultsPanel { right: 18px; top: 20px; bottom: 22px; width: 360px; overflow-y: auto; }
+  .panel-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-muted); display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 12px;
+  }
+  .day { border-bottom: 1px solid var(--border); padding: 0 0 14px; margin-bottom: 14px; }
+  .day:last-of-type { border-bottom: none; margin-bottom: 4px; padding-bottom: 0; }
+  .day .dhead { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 9px; }
+  .day .dnum { font-size: 11px; font-weight: 800; letter-spacing: 0.04em; color: var(--accent); }
+  .day input[type=date] {
+    font-size: 12.5px; padding: 5px 7px; border: 1px solid var(--border); border-radius: 8px;
+    background: #fff; width: auto; font-family: inherit;
+  }
+  .chiplist { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; min-height: 4px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1px solid var(--border);
+    border-radius: 999px; padding: 4px 6px 4px 11px; font-size: 12.5px; font-weight: 600;
+  }
+  .chip .ord { font-size: 10px; color: var(--ink-muted); font-weight: 700; }
+  .chip button {
+    background: var(--page); border: none; cursor: pointer; color: var(--ink-muted);
+    font-size: 11px; line-height: 1; width: 18px; height: 18px; border-radius: 50%;
+  }
+  .chip button:hover { background: var(--bad); color: #fff; }
+  .search-wrap { position: relative; }
+  input[type=text] {
+    width: 100%; padding: 9px 10px; font-family: inherit; font-size: 13.5px;
+    color: var(--ink-primary); background: #fff; border: 1px solid var(--border); border-radius: 10px; appearance: none;
+  }
+  input:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .results {
+    position: absolute; z-index: 90; top: 100%; left: 0; right: 0; margin-top: 4px; background: #fff;
+    border: 1px solid var(--border); border-radius: 10px; max-height: 240px; overflow-y: auto; box-shadow: var(--shadow);
+  }
+  .results button {
+    display: flex; justify-content: space-between; gap: 10px; width: 100%; text-align: left;
+    padding: 8px 11px; background: none; border: none; border-bottom: 1px solid var(--page);
+    cursor: pointer; font-family: inherit; align-items: baseline;
+  }
+  .results button:hover, .results button:focus { background: var(--page); }
+  .results .nm { font-size: 13px; font-weight: 600; }
+  .results .sd { font-size: 11px; color: var(--ink-muted); white-space: nowrap; }
+  .results .empty { padding: 10px 11px; font-size: 12px; color: var(--ink-muted); }
+  .rm-day { background: none; border: none; cursor: pointer; font-size: 11px; font-weight: 700; color: var(--ink-muted); padding: 3px 5px; }
+  .rm-day:hover { color: var(--bad); }
+
+  .btn {
+    font-family: inherit; font-size: 13.5px; font-weight: 700; padding: 11px 16px;
+    border: 1px solid var(--border); border-radius: 12px; background: var(--page); color: var(--ink-primary); cursor: pointer; width: 100%;
+  }
+  .btn:hover { background: var(--border); }
+  .btn-primary {
+    background: linear-gradient(120deg, var(--brand-blue) 0%, var(--brand-blue-light) 100%);
+    border: none; color: #fff; box-shadow: 0 6px 16px rgba(24,64,165,0.3);
+  }
+  .btn-primary:hover { filter: brightness(1.06); }
+  .btn-primary[disabled] { opacity: .5; cursor: not-allowed; }
+  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .btn-row .btn-primary { grid-column: 1/-1; }
+  .note { font-size: 11.5px; color: var(--ink-muted); margin-top: 12px; line-height: 1.5; }
+
+  .map-pin { display: flex; flex-direction: column; align-items: center; }
+  .map-pin .badge {
+    width: 26px; height: 26px; border-radius: 50% 50% 50% 0; transform: rotate(45deg);
+    background: var(--accent); box-shadow: 0 2px 6px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;
+  }
+  .map-pin .badge span { transform: rotate(-45deg); color: #fff; font-size: 11.5px; font-weight: 800; }
+  .map-pin .lbl {
+    margin-top: 3px; background: rgba(22,21,15,0.82); color: #fff; font-size: 10.5px; font-weight: 600;
+    padding: 2px 6px; border-radius: 6px; white-space: nowrap;
+  }
+  .map-arrow { color: var(--accent); font-size: 26px; font-weight: 900; text-shadow: 0 1px 3px rgba(255,255,255,0.9); }
+
+  /* ---------- 기여 막대 ---------- */
+  .bar { display: flex; width: 100%; border-radius: 10px; overflow: hidden; background: var(--page); border: 1px solid var(--border); }
+  .bar.lg { height: 96px; }
+  .bar.sm { height: 36px; }
+  .seg { position: relative; display: flex; align-items: flex-end; border-right: 1px solid rgba(255,255,255,0.6); overflow: hidden; }
+  .seg:last-child { border-right: none; }
+  .seg .fill { width: 100%; height: 0; transition: height .55s cubic-bezier(.2,.7,.3,1); }
+  .seg .fill.na { height: 100%; background: repeating-linear-gradient(45deg, var(--border), var(--border) 4px, #fff 4px, #fff 8px); }
+  .seg .pct { position: absolute; top: 4px; left: 0; right: 0; text-align: center; font-size: 10px; font-weight: 700; color: var(--ink-secondary); pointer-events: none; }
+  .legend { display: flex; width: 100%; margin-top: 6px; }
+  .legend .lg-item { text-align: center; padding: 0 2px; min-width: 0; }
+  .legend .sw { height: 4px; margin-bottom: 4px; border-radius: 2px; }
+  .legend .nm { font-size: 10.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .legend .wt { font-size: 9.5px; color: var(--ink-muted); }
+
+  /* ---------- 결과 ---------- */
+  .headline {
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 4px 0 16px; margin-bottom: 14px; border-bottom: 1px solid var(--border);
+  }
+  .score-big { font-size: 48px; font-weight: 800; line-height: .95; letter-spacing: -0.02em; color: var(--accent); }
+  .score-big .of { font-size: 14px; color: var(--ink-muted); font-weight: 600; letter-spacing: 0; }
+  .grade { display: inline-block; margin-top: 6px; font-size: 12px; font-weight: 700; padding: 3px 11px; border-radius: 999px; background: var(--accent); color: #fff; }
+  .method { font-size: 11px; color: var(--ink-muted); margin-top: 8px; line-height: 1.5; }
+  .bar-detail { margin-top: 8px; }
+  .bar-detail summary {
+    font-size: 11.5px; font-weight: 700; color: var(--accent); cursor: pointer; list-style: none;
+    display: inline-flex; align-items: center; gap: 4px; user-select: none;
+  }
+  .bar-detail summary::-webkit-details-marker { display: none; }
+  .bar-detail summary::before { content: "▸"; font-size: 10px; transition: transform .15s ease; }
+  .bar-detail[open] summary::before { transform: rotate(90deg); }
+  .bar-detail[open] summary { margin-bottom: 8px; }
+
+  .fixbox { border-left: 3px solid var(--good); background: rgba(27,175,122,0.07); border-radius: 0 12px 12px 0; padding: 12px 14px; margin-bottom: 14px; }
+  .fixbox h3 { margin: 0 0 8px; font-size: 12.5px; font-weight: 800; }
+  .fixrow { display: flex; flex-direction: column; gap: 2px; padding: 7px 0; border-top: 1px solid var(--page); font-size: 12px; }
+  .fixrow:first-of-type { border-top: none; }
+  .fixrow .lbl { font-weight: 700; }
+  .fixrow .when { font-size: 10.5px; color: var(--ink-muted); }
+  .fixrow .to { font-size: 11.5px; color: var(--good); font-weight: 700; }
+  .fixrow .to b { font-size: 13px; }
+
+  .dayblock { margin-bottom: 14px; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .dayblock > header { box-shadow: none; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 14px; background: rgba(24,64,165,0.06); }
+  .dayblock h3 { margin: 0; font-size: 13px; font-weight: 800; letter-spacing: -0.01em; }
+  .dayblock .dsc { font-size: 18px; font-weight: 800; line-height: 1; color: var(--accent); }
+  .dayblock .dsc small { font-size: 10.5px; font-weight: 700; color: var(--ink-secondary); margin-left: 6px; }
+  .regrow { padding: 12px 14px; border-top: 1px solid var(--page); }
+  .regrow:first-child { border-top: none; }
+  .regrow header { background: none; box-shadow: none; padding: 0; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+  .regrow h4 { margin: 0; font-size: 13.5px; font-weight: 800; }
+  .regrow .ord { font-size: 10.5px; color: var(--ink-muted); font-weight: 700; margin-right: 5px; }
+  .regrow .grp { font-size: 9.5px; letter-spacing: 0.04em; border: 1px solid var(--border); border-radius: 999px; padding: 1px 6px; color: var(--ink-secondary); margin-left: 6px; }
+  .regrow .sc { font-size: 19px; font-weight: 800; line-height: 1; text-align: right; white-space: nowrap; color: var(--accent); }
+  .regrow .sc small { display: block; font-size: 10px; font-weight: 700; color: var(--ink-secondary); margin-top: 3px; }
+  .why { margin-top: 8px; font-size: 12px; color: var(--ink-secondary); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+  .why b { color: var(--ink-primary); font-weight: 700; }
+  .alts { margin-top: 8px; font-size: 11.5px; color: var(--ink-secondary); }
+  .alts .a { display: inline-block; font-size: 11px; border: 1px solid var(--border); border-radius: 999px; padding: 2px 8px; margin: 3px 4px 0 0; background: var(--page); }
+  .alts .a b { color: var(--good); }
+  .flag { margin-top: 8px; padding: 7px 10px; background: var(--page); border-radius: 8px; border-left: 3px solid var(--mid); font-size: 11.5px; color: var(--ink-secondary); }
+  .empty-state { border: 1.5px dashed var(--border); border-radius: 14px; padding: 36px 18px; text-align: center; color: var(--ink-muted); background: var(--surface); }
+  .empty-state strong { display: block; color: var(--ink-secondary); font-size: 13.5px; font-weight: 700; margin-bottom: 6px; }
+  .error { border: 1px solid var(--bad); border-left-width: 4px; background: var(--surface); border-radius: 12px; padding: 12px 14px; font-size: 12.5px; color: var(--bad); }
+  .foot-note { font-size: 11px; color: var(--ink-muted); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .spinner {
+    display: inline-block; width: 11px; height: 11px; border: 2px solid rgba(255,255,255,0.6);
+    border-top-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; margin-right: 7px; vertical-align: -1px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 560px) {
+    #heroCard { left: 12px; right: 12px; top: 12px; width: auto; }
+    #rangePanel { right: 12px; bottom: 12px; width: auto; left: 12px; }
+    #tripInputPanel { left: 12px; right: 12px; top: 12px; width: auto; max-height: 46vh; }
+    #tripResultsPanel { left: 12px; right: 12px; top: auto; bottom: 12px; width: auto; height: 46vh; }
+  }
+
+  /* ---- 인트로 스플래시 ---- */
+  #introCover {
+    position: fixed; inset: 0; background: #fff; z-index: 2000;
+    transition: opacity .5s ease;
+  }
+  #introCover.hide { opacity: 0; pointer-events: none; }
+  #introCover .mark { width: 70px; height: 70px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+  #introCover .mark svg { position: absolute; top: 0; left: 0; }
+  #introCover .mark svg circle { fill: none; stroke: #1840a5; stroke-width: 2px; }
+  #introCover .mark .base circle { opacity: .25; }
+  #introCover .mark .loader circle {
+    stroke-dasharray: 130; stroke-dashoffset: 100;
+    animation: introLoad 1s linear infinite;
+    transform-origin: center;
+  }
+  @keyframes introLoad { to { transform: rotate(360deg); } }
+
+  #introStage {
+    position: fixed; inset: 0; z-index: 1900; overflow: hidden;
+    background: #1840a5;
+    transition: opacity .8s ease;
+  }
+  #introStage.hide { opacity: 0; pointer-events: none; }
+  #introStage .intro-sky {
+    position: absolute; inset: 0;
+    background: url('outputs/intro_bg.jpg') no-repeat center 100%;
+    background-size: auto 175%;
+    transition: background-position 3.4s linear;
+  }
+  #introStage.play .intro-sky { background-position: center 0%; }
+  #introStage .intro-sky::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(10,30,80,0.55) 0%, rgba(10,30,80,0.15) 35%, rgba(10,30,80,0.55) 100%);
+  }
+
+  #introStage .intro-copy {
+    position: absolute; top: 13%; left: 50%; transform: translate(-50%, -50%);
+    color: #fff; font-family: "Gowun Batang", serif; font-size: 18px; letter-spacing: .02em;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.35); opacity: 0; text-align: center; width: 90%;
+  }
+  #introStage.play .intro-copy { animation: introCopyFlash 3s ease .8s both; }
+  @keyframes introCopyFlash {
+    0% { opacity: 0; } 20% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; }
+  }
+
+  #introStage .intro-title {
+    position: absolute; top: 27%; left: 50%; transform: translate(-50%, -50%);
+    text-align: center; opacity: 0;
+  }
+  #introStage.play .intro-title {
+    animation: introTitleIn 1.4s cubic-bezier(0.16, 0.9, 0.3, 1) 3.4s both;
+  }
+  @keyframes introTitleIn {
+    0% { opacity: 0; transform: translate(-50%, -180%); }
+    100% { opacity: 1; transform: translate(-50%, -50%); }
+  }
+  #introStage .intro-title h1 {
+    margin: 0; color: #fff; font-family: "Song Myung", serif; font-weight: 400;
+    font-size: clamp(38px, 9vw, 72px); letter-spacing: .06em;
+    text-shadow: 0 4px 24px rgba(10,30,80,0.5);
+  }
+  #introStage .intro-title h1 span { color: #ffe066; }
+  #introStage .intro-title .intro-sub {
+    margin-top: 10px; color: rgba(255,255,255,0.85); font-size: 13px; letter-spacing: .2em;
+  }
+  #introStage .intro-cta-group {
+    position: absolute; left: 50%; bottom: 7%; transform: translate(-50%, 16px);
+    display: flex; flex-direction: column; gap: 10px; align-items: center; z-index: 5; opacity: 0;
+  }
+  #introStage.play .intro-cta-group {
+    animation: introCtaIn 1s ease 4.8s both;
+  }
+  @keyframes introCtaIn {
+    0% { opacity: 0; transform: translate(-50%, 16px); }
+    100% { opacity: 1; transform: translate(-50%, 0); }
+  }
+  #introStage .intro-cta {
+    color: #16150f; font-family: -apple-system, "Apple SD Gothic Neo", sans-serif;
+    font-size: 15px; font-weight: 700; background: #fff; border: none;
+    border-radius: 999px; padding: 14px 28px; cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25); text-decoration: none; display: inline-block;
+  }
+  #introStage .intro-cta:hover { background: #f6f5f1; }
+  #introStage .intro-cta.secondary {
+    background: rgba(255,255,255,0.14); color: #fff; border: 1px solid rgba(255,255,255,0.55);
+    box-shadow: none; font-size: 13.5px; padding: 11px 24px;
+  }
+  #introStage .intro-cta.secondary:hover { background: rgba(255,255,255,0.24); }
+</style>
+</head>
+<body>
+<div id="introCover">
+  <div class="mark">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 46" class="base"><circle cx="23" cy="23" r="20" /></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 46" class="loader"><circle cx="23" cy="23" r="20" /></svg>
+  </div>
+</div>
+<div id="introStage">
+  <div class="intro-sky"></div>
+  <p class="intro-copy">이제 비는 그치고, 오늘 하루의<br>하늘 점수를 알려주기 시작할거야</p>
+  <div class="intro-title">
+    <h1>날씨의 <span>ED</span>아이</h1>
+    <div class="intro-sub">26-2 DSL 기상팀 작품</div>
+  </div>
+  <div class="intro-cta-group">
+    <button class="intro-cta" onclick="dismissIntro()">오늘의 날씨 점수 확인하기 →</button>
+    <button class="intro-cta secondary" onclick="dismissIntro(); window.switchMode && window.switchMode('trip');">내 여행일정 날씨 점수 확인하기 →</button>
+  </div>
+</div>
+<script>
+  function dismissIntro() {
+    document.getElementById('introCover').classList.add('hide');
+    document.getElementById('introStage').classList.add('hide');
+  }
+  window.addEventListener('DOMContentLoaded', function () {
+    setTimeout(function () {
+      document.getElementById('introCover').classList.add('hide');
+      document.getElementById('introStage').classList.add('play');
+    }, 500);
+  });
+</script>
+<header>
+  <div class="brandline">
+    <span class="brand-mark">날씨의 <b>ED</b>아이</span>
+    <h1 id="pageTitle">오늘의 날씨 점수 — 내 주변</h1>
+  </div>
+  <span class="meta" id="updatedAt">데이터 로딩 중…</span>
+  <div class="header-actions">
+    <a class="home-link" href="/">처음 화면</a>
+    <button class="trip-link" id="modeToggleBtn" type="button">여행 일정 날씨 점수 짜보기 →</button>
+  </div>
+</header>
+<div id="mapWrap">
+  <div id="map"></div>
+  <div id="status">위치 확인 중…</div>
+
+  <div class="panel" id="heroCard">
+    <div class="band" id="heroBand"></div>
+    <div class="body">
+      <div class="eyebrow"><span class="dot"></span><span>내 위치 기준</span></div>
+      <div class="locname" id="heroLoc">위치 확인 중…</div>
+      <div id="heroMain"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="rangePanel" style="display:none;">
+    <div class="title"><span>표시 범위</span><b id="rangeValue">30</b></div>
+    <input type="range" id="rangeSlider" min="5" max="60" step="1" value="30" />
+    <div class="scale"><span>5곳</span><span>가까운 순</span><span>60곳</span></div>
+    <hr class="divider" />
+    <div class="bar"></div>
+    <div class="legendscale"><span id="legendMin">·</span><span>표시 지역 내 상대 비교</span><span id="legendMax">·</span></div>
+  </div>
+
+  <div class="panel" id="tripInputPanel" style="display:none;">
+    <div class="panel-label"><span>여행 일정</span><span id="planCount">0일</span></div>
+    <div id="days"></div>
+    <div class="btn-row">
+      <button class="btn" id="addDay" type="button">+ 날짜 추가</button>
+      <button class="btn" id="sample" type="button">예시 채우기</button>
+      <button class="btn btn-primary" id="run" type="button">점수 내기</button>
+    </div>
+    <p class="note">예보는 기상 16일, 대기질 5일까지 잡힙니다. 시군구 264곳 모두 지원합니다.</p>
+  </div>
+
+  <div class="panel" id="tripResultsPanel" style="display:none;">
+    <div class="panel-label"><span>결과</span><span id="variantLabel">hybrid 가중치</span></div>
+    <div id="out">
+      <div class="empty-state">
+        <strong>아직 계산한 계획이 없습니다</strong>
+        날짜를 추가하고 시군구를 넣어 보세요.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 카카오 JavaScript 키 -->
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=c27d3f1ea71b475c4d03aeaa99221828&libraries=services"></script>
+<script>
+window.addEventListener('error', function (e) {
+  var el = document.getElementById('status');
+  if (el) { el.style.display = 'block'; el.textContent = '스크립트 에러: ' + e.message; }
+});
+</script>
+<script>
+(async function () {
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  const statusEl = document.getElementById('status');
+  const updatedAtEl = document.getElementById('updatedAt');
+  const pageTitle = document.getElementById('pageTitle');
+  const heroCard = document.getElementById('heroCard');
+  const heroBand = document.getElementById('heroBand');
+  const heroLoc = document.getElementById('heroLoc');
+  const heroMain = document.getElementById('heroMain');
+  const rangePanel = document.getElementById('rangePanel');
+  const rangeSlider = document.getElementById('rangeSlider');
+  const rangeValue = document.getElementById('rangeValue');
+  const tripInputPanel = document.getElementById('tripInputPanel');
+  const tripResultsPanel = document.getElementById('tripResultsPanel');
+  const modeToggleBtn = document.getElementById('modeToggleBtn');
+
+  function scoreToColor(score, minS, maxS) {
+    const stops = [{ p: 0, c: [208, 52, 44] }, { p: 50, c: [245, 179, 1] }, { p: 100, c: [27, 175, 122] }];
+    let s = score;
+    if (minS !== undefined && maxS !== undefined && maxS - minS > 1e-6) {
+      s = ((score - minS) / (maxS - minS)) * 100;
+    }
+    s = Math.max(0, Math.min(100, s));
+    let a = stops[0], b = stops[1];
+    if (s > 50) { a = stops[1]; b = stops[2]; }
+    const t = (s - a.p) / (b.p - a.p);
+    const rgb = a.c.map((v, i) => Math.round(v + (b.c[i] - v) * t));
+    return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+  }
+  function haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371, toRad = (d) => d * Math.PI / 180;
+    const p1 = toRad(lat1), p2 = toRad(lat2);
+    const dphi = toRad(lat2 - lat1), dlmb = toRad(lon2 - lon1);
+    const a = Math.sin(dphi/2)**2 + Math.cos(p1)*Math.cos(p2)*Math.sin(dlmb/2)**2;
+    return 2 * R * Math.asin(Math.sqrt(a));
+  }
+  function pointInRing(lat, lon, ring) {
+    let inside = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const [xi, yi] = ring[i], [xj, yj] = ring[j];
+      const intersect = ((yi > lat) !== (yj > lat)) && (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+  function findContainingCode(lat, lon, features) {
+    for (const f of features) {
+      const g = f.geometry;
+      const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+      for (const poly of polys) if (pointInRing(lat, lon, poly[0])) return f.properties.signguCode;
+    }
+    return null;
+  }
+
+  let weatherData, boundaries, places;
+  try {
+    const [wRes, gRes, pRes] = await Promise.all([
+      fetch('/weather/today'),
+      fetch('outputs/korea_signgu_boundaries.json'),
+      fetch('outputs/place_recommendations.json'),
+    ]);
+    weatherData = await wRes.json();
+    boundaries = await gRes.json();
+    places = pRes.ok ? await pRes.json() : {};
+  } catch (e) {
+    statusEl.textContent = '데이터 로딩 실패: ' + e.message;
+    return;
+  }
+  updatedAtEl.textContent = `업데이트: ${weatherData.updatedAt} · 계절: ${weatherData.season}`;
+  const byCode = {};
+  weatherData.districts.forEach((d) => { byCode[d.signguCode] = d; });
+
+  function renderHero(d, label, exact) {
+    heroBand.style.background = scoreToColor(d.displayScore);
+    heroLoc.textContent = label;
+    heroMain.innerHTML = `
+      <div class="scoreRow"><span class="scoreNum" style="color:${scoreToColor(d.displayScore)}">${d.displayScore.toFixed(0)}</span><span class="scoreOf">/ 100</span></div>
+      <div class="advice">${d.comment}</div>
+      <div class="stats${d.PM25 !== undefined ? ' has5' : ''}">
+        <div class="stat"><div class="ic">🌡️</div><div class="v">${d.T1H}°</div><div class="l">기온</div></div>
+        <div class="stat"><div class="ic">💧</div><div class="v">${d.REH}%</div><div class="l">습도</div></div>
+        <div class="stat"><div class="ic">💨</div><div class="v">${d.WSD}</div><div class="l">풍속 m/s</div></div>
+        <div class="stat"><div class="ic">🌧️</div><div class="v">${d.RN1}</div><div class="l">강수 mm</div></div>
+        ${d.PM25 !== undefined ? `<div class="stat"><div class="ic">😷</div><div class="v">${d.PM25}</div><div class="l">초미세먼지</div></div>` : ''}
+      </div>
+      ${exact ? '' : '<div style="margin-top:10px;font-size:11px;color:var(--ink-muted)">가장 가까운 지역 기준 점수입니다</div>'}
+    `;
+    requestAnimationFrame(() => heroCard.classList.add('show'));
+  }
+  function renderNoLocation(message) {
+    heroBand.style.background = 'var(--ink-muted)';
+    heroLoc.textContent = '위치를 확인할 수 없어요';
+    heroMain.innerHTML = `<div class="locerr">${message}</div>`;
+    requestAnimationFrame(() => heroCard.classList.add('show'));
+  }
+  function recommendationHtml(d) {
+    const entry = places[d.signguCode];
+    if (!entry) return '';
+    const outdoor = d.displayScore >= 50;
+    const list = outdoor ? entry.outdoor : entry.indoor;
+    if (!list || !list.length) return '';
+    const label = outdoor ? '🌳 근처 실외활동 추천' : '🏛️ 근처 실내활동 추천';
+    const cards = list.map((p) => `
+      <a class="rec-card" href="${p.url}" target="_blank" rel="noopener">
+        ${p.thumbnail ? `<img class="ri" src="${p.thumbnail}" loading="lazy" onerror="this.style.display='none'" />` : '<div class="ri"></div>'}
+        <div class="rn">${p.name}</div>
+        <div class="rc">${p.category} · ${(p.distanceM / 1000).toFixed(1)}km</div>
+      </a>`).join('');
+    return `
+      <div class="rec-panel">
+        <div class="rec-label">${label}</div>
+        <div class="rec-scroller">
+          <div class="rec-row">${cards}</div>
+        </div>
+        <div class="rec-nav">
+          <button type="button" class="rec-btn" data-dir="-1">‹</button>
+          <button type="button" class="rec-btn" data-dir="1">›</button>
+        </div>
+      </div>`;
+  }
+  function buildInfoHtml(d) {
+    return `
+      <div class="popup-wrap">
+        <div class="kakao-info">
+          <div class="n">${d.signguNm}</div>
+          <div class="s" style="color:${scoreToColor(d.displayScore)}">${d.displayScore.toFixed(1)}</div>
+          <div class="a">${d.comment}</div>
+          <table>
+            <tr><td>기온</td><td class="v">${d.T1H}°C</td></tr>
+            <tr><td>습도</td><td class="v">${d.REH}%</td></tr>
+            <tr><td>풍속</td><td class="v">${d.WSD} m/s</td></tr>
+            <tr><td>강수</td><td class="v">${d.RN1} mm</td></tr>
+            ${d.PM25 !== undefined ? `<tr><td>초미세먼지</td><td class="v">${d.PM25} ㎍/㎥</td></tr>` : ''}
+          </table>
+        </div>
+        ${recommendationHtml(d)}
+      </div>`;
+  }
+
+  let map = null;
+  let currentOverlays = [];       // 오늘의 날씨 점수 모드 (폴리곤/팝업)
+  let centerMarker = null;
+  let userLat = null, userLon = null;
+  let lastRangeCount = 30;
+
+  function clearOverlays() {
+    currentOverlays.forEach((o) => o.setMap(null));
+    currentOverlays = [];
+    if (map) map.setDraggable(true);
+  }
+
+  function renderNearby(count) {
+    if (!map) return;
+    clearOverlays();
+    lastRangeCount = count;
+
+    const withDist = weatherData.districts.map((d) => ({ ...d, dist: haversineKm(userLat, userLon, d.lat, d.lon) }));
+    withDist.sort((a, b) => a.dist - b.dist);
+    const nearby = withDist.slice(0, count);
+    const nearbyCodes = new Set(nearby.map((d) => d.signguCode));
+    const nearbyScores = nearby.map((d) => d.displayScore);
+    const minS = Math.min(...nearbyScores), maxS = Math.max(...nearbyScores);
+    document.getElementById('legendMin').textContent = minS.toFixed(0);
+    document.getElementById('legendMax').textContent = maxS.toFixed(0);
+
+    let infoWindow = null;
+    const bounds = new kakao.maps.LatLngBounds();
+    bounds.extend(new kakao.maps.LatLng(userLat, userLon));
+
+    boundaries.features.forEach((feature) => {
+      const code = feature.properties.signguCode;
+      if (!nearbyCodes.has(code)) return;
+      const d = byCode[code];
+      if (!d) return;
+
+      const g = feature.geometry;
+      const polyRings = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+      polyRings.forEach((poly) => {
+        const path = poly[0].map(([lon, lat]) => {
+          const ll = new kakao.maps.LatLng(lat, lon);
+          bounds.extend(ll);
+          return ll;
+        });
+        const polygon = new kakao.maps.Polygon({
+          map, path, strokeWeight: 1.5, strokeColor: '#ffffff', strokeOpacity: 0.9,
+          fillColor: scoreToColor(d.displayScore, minS, maxS), fillOpacity: 0.72,
+        });
+        kakao.maps.event.addListener(polygon, 'mouseover', () => polygon.setOptions({ fillOpacity: 0.92, strokeWeight: 2.5 }));
+        kakao.maps.event.addListener(polygon, 'mouseout', () => polygon.setOptions({ fillOpacity: 0.72, strokeWeight: 1.5 }));
+        kakao.maps.event.addListener(polygon, 'click', (mouseEvent) => {
+          if (infoWindow) infoWindow.setMap(null);
+          const wrap = document.createElement('div');
+          wrap.innerHTML = buildInfoHtml(d);
+          const content = wrap.firstElementChild;
+          const recRow = content.querySelector('.rec-row');
+          if (recRow) {
+            kakao.maps.event.preventMap(recRow);
+            content.querySelectorAll('.rec-btn').forEach((btn) => {
+              btn.addEventListener('click', () => {
+                const cardW = recRow.querySelector('.rec-card')?.offsetWidth || 92;
+                recRow.scrollBy({ left: cardW * 2 * parseInt(btn.dataset.dir, 10), behavior: 'smooth' });
+              });
+            });
+          }
+          infoWindow = new kakao.maps.CustomOverlay({ map, position: mouseEvent.latLng, content, yAnchor: 1.3, clickable: true });
+          currentOverlays.push(infoWindow);
+        });
+        currentOverlays.push(polygon);
+      });
+    });
+
+    map.setBounds(bounds);
+    return nearby;
+  }
+
+  rangeSlider.addEventListener('input', () => {
+    rangeValue.textContent = rangeSlider.value;
+    renderNearby(parseInt(rangeSlider.value, 10));
+  });
+
+  function refreshHeroOnly() {
+    if (userLat === null) return;
+    const withDist = weatherData.districts.map((d) => ({ ...d, dist: haversineKm(userLat, userLon, d.lat, d.lon) }));
+    withDist.sort((a, b) => a.dist - b.dist);
+    const containingCode = findContainingCode(userLat, userLon, boundaries.features);
+    const exact = containingCode && byCode[containingCode];
+    if (exact) renderHero(exact, exact.signguNm, true);
+    else if (withDist.length) renderHero(withDist[0], `${withDist[0].signguNm} 인근`, false);
+  }
+
+  async function pollForUpdate() {
+    try {
+      const res = await fetch('/weather/today', { cache: 'no-store' });
+      const fresh = await res.json();
+      if (fresh.updatedAt === weatherData.updatedAt) return;
+      weatherData = fresh;
+      Object.keys(byCode).forEach((k) => delete byCode[k]);
+      weatherData.districts.forEach((d) => { byCode[d.signguCode] = d; });
+      updatedAtEl.textContent = `업데이트: ${weatherData.updatedAt} · 계절: ${weatherData.season}`;
+      if (map && currentMode === 'weather') renderNearby(lastRangeCount);
+      refreshHeroOnly();
+    } catch (e) { /* 다음 주기에 재시도 */ }
+  }
+  setInterval(pollForUpdate, 5 * 60 * 1000);
+
+  function locateAndShowWeather() {
+    statusEl.style.display = 'block';
+    statusEl.textContent = '위치 확인 중…';
+    if (!navigator.geolocation) {
+      statusEl.style.display = 'none';
+      renderNoLocation('이 브라우저는 위치 확인을 지원하지 않아요.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lon } = pos.coords;
+        statusEl.style.display = 'none';
+        userLat = lat; userLon = lon;
+        map.setCenter(new kakao.maps.LatLng(lat, lon));
+        map.setLevel(9);
+        if (centerMarker) centerMarker.setMap(null);
+        centerMarker = new kakao.maps.Marker({ map, position: new kakao.maps.LatLng(lat, lon) });
+        rangePanel.style.display = currentMode === 'weather' ? 'block' : 'none';
+        const nearby = renderNearby(parseInt(rangeSlider.value, 10));
+
+        const containingCode = findContainingCode(lat, lon, boundaries.features);
+        const exact = containingCode && byCode[containingCode];
+        if (exact) renderHero(exact, exact.signguNm, true);
+        else if (nearby && nearby.length) renderHero(nearby[0], `${nearby[0].signguNm} 인근`, false);
+        else renderNoLocation('주변 날씨 데이터를 찾을 수 없습니다.');
+      },
+      (err) => {
+        statusEl.style.display = 'none';
+        const messages = {
+          1: '위치 권한이 차단되어 있어요. 주소창의 자물쇠(사이트 정보) 아이콘에서 위치 권한을 "허용"으로 바꾼 뒤 새로고침해주세요.',
+          2: '위치를 확인할 수 없어요. 기기의 위치 서비스가 켜져 있는지 확인해주세요.',
+          3: '위치 확인이 너무 오래 걸려요. 네트워크 상태를 확인하고 다시 시도해주세요.',
+        };
+        renderNoLocation(messages[err.code] || '위치를 확인할 수 없어요.');
+      },
+      { enableHighAccuracy: false, timeout: 10000 }
+    );
+  }
+
+  /* ================================================================ 여행 일정 모드 */
+  const COMPONENTS = ["thermal","humidity","wind","precipitation","air_quality"];
+  const KO = {thermal:"기온",humidity:"습도",wind:"바람",precipitation:"강수",air_quality:"대기질"};
+
+  let plan = [], seq = 0;
+  const iso = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
+  function blankDay(offset) { return { id: ++seq, date: iso(offset), regions: [] }; }
+  const dayById = (id) => plan.find((d) => d.id === +id);
+
+  let tripOverlays = [];
+  function clearTripOverlays() { tripOverlays.forEach((o) => o.setMap(null)); tripOverlays = []; }
+  function bearing(a, b) {
+    const toRad = (d) => d * Math.PI / 180, toDeg = (r) => r * 180 / Math.PI;
+    const y = Math.sin(toRad(b.lon - a.lon)) * Math.cos(toRad(b.lat));
+    const x = Math.cos(toRad(a.lat)) * Math.sin(toRad(b.lat)) - Math.sin(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.cos(toRad(b.lon - a.lon));
+    return (toDeg(Math.atan2(y, x)) + 360) % 360;
+  }
+  const DAY_COLORS = ['#1840a5', '#d97a3f', '#2e8f96', '#8a5ea0', '#c23b3b', '#5a9e4a', '#b8860b'];
+
+  function renderTripMap() {
+    if (!map || currentMode !== 'trip') return;
+    clearTripOverlays();
+    const stops = [];
+    plan.forEach((d, di) => d.regions.forEach((r) => { if (r.lat != null && r.lon != null) stops.push({ ...r, dayIndex: di }); }));
+    document.getElementById('planCount').textContent = plan.length + '일';
+    if (!stops.length) return;
+
+    const bounds = new kakao.maps.LatLngBounds();
+    stops.forEach((s) => bounds.extend(new kakao.maps.LatLng(s.lat, s.lon)));
+
+    for (let i = 0; i < stops.length - 1; i++) {
+      const a = stops[i], b = stops[i + 1];
+      const color = DAY_COLORS[a.dayIndex % DAY_COLORS.length];
+      const path = [new kakao.maps.LatLng(a.lat, a.lon), new kakao.maps.LatLng(b.lat, b.lon)];
+      const line = new kakao.maps.Polyline({ map, path, strokeWeight: 3, strokeColor: color, strokeOpacity: 0.85, strokeStyle: 'solid' });
+      tripOverlays.push(line);
+      const mid = new kakao.maps.LatLng((a.lat + b.lat) / 2, (a.lon + b.lon) / 2);
+      const deg = bearing(a, b);
+      const arrow = new kakao.maps.CustomOverlay({
+        map, position: mid,
+        content: `<div class="map-arrow" style="transform:rotate(${deg - 90}deg);color:${color}">➤</div>`,
+        yAnchor: 0.5, xAnchor: 0.5,
+      });
+      tripOverlays.push(arrow);
+    }
+    stops.forEach((s, i) => {
+      const color = DAY_COLORS[s.dayIndex % DAY_COLORS.length];
+      const ov = new kakao.maps.CustomOverlay({
+        map, position: new kakao.maps.LatLng(s.lat, s.lon),
+        content: `<div class="map-pin"><div class="badge" style="background:${color}"><span>${i + 1}</span></div><div class="lbl">${esc(s.label || s.name)}</div></div>`,
+        yAnchor: 1, xAnchor: 0.5,
+      });
+      tripOverlays.push(ov);
+    });
+    map.setBounds(bounds, 60);
+  }
+
+  function renderPlan() {
+    const host = document.getElementById('days'); host.innerHTML = '';
+    document.getElementById('planCount').textContent = plan.length + '일';
+    if (!plan.length) {
+      host.innerHTML = `<div class="empty-state" style="padding:24px 14px"><strong>일정이 비어 있습니다</strong>날짜를 추가해 시작하세요.</div>`;
+      renderTripMap();
+      return;
+    }
+    plan.forEach((d, i) => {
+      const el = document.createElement('div'); el.className = 'day';
+      el.innerHTML = `
+        <div class="dhead">
+          <span class="dnum">${i + 1}일차</span>
+          <input type="date" data-act="date" data-id="${d.id}" value="${d.date}" aria-label="${i + 1}일차 날짜">
+          <button class="rm-day" type="button" data-act="rmday" data-id="${d.id}">삭제</button>
+        </div>
+        <div class="chiplist">${d.regions.map((r, j) => `
+          <span class="chip"><span class="ord">${j + 1}</span>${esc(r.label)}
+            <button type="button" data-act="rmreg" data-id="${d.id}" data-code="${r.code}" aria-label="${esc(r.label)} 빼기">×</button></span>`).join('')}
+        </div>
+        <div class="search-wrap">
+          <input type="text" data-act="q" data-id="${d.id}" autocomplete="off" placeholder="시군구 검색 — 예: 종로구, 해운대, 강릉">
+          <div data-role="results"></div>
+        </div>`;
+      host.appendChild(el);
+    });
+    renderTripMap();
+  }
+
+  document.getElementById('days').addEventListener('input', (e) => {
+    const { act, id } = e.target.dataset;
+    if (act === 'date') dayById(id).date = e.target.value;
+    if (act === 'q') searchRegion(e.target, dayById(id));
+  });
+  document.getElementById('days').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-act]'); if (!b) return;
+    const { act, id, code } = b.dataset;
+    if (act === 'rmday') { plan = plan.filter((d) => d.id !== +id); renderPlan(); }
+    if (act === 'rmreg') { const d = dayById(id); d.regions = d.regions.filter((r) => r.code !== code); renderPlan(); }
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-wrap')) document.querySelectorAll('.results').forEach((r) => r.remove());
+  });
+
+  let searchTimer = null;
+  function searchRegion(input, day) {
+    clearTimeout(searchTimer);
+    const q = input.value.trim();
+    const host = input.closest('.search-wrap').querySelector('[data-role=results]');
+    if (!q) { host.innerHTML = ''; return; }
+    searchTimer = setTimeout(async () => {
+      try {
+        const { results } = await (await fetch(`/regions/search?q=${encodeURIComponent(q)}`)).json();
+        if (!results.length) { host.innerHTML = `<div class="results"><div class="empty">그런 시군구가 없습니다.</div></div>`; return; }
+        const box = document.createElement('div'); box.className = 'results';
+        results.forEach((r) => {
+          const b = document.createElement('button'); b.type = 'button';
+          b.innerHTML = `<span class="nm">${esc(r.name)}</span><span class="sd">${esc(r.sido)} · ${r.region_group}</span>`;
+          b.onclick = () => { if (!day.regions.some((x) => x.code === r.code)) day.regions.push(r); renderPlan(); };
+          box.appendChild(b);
+        });
+        host.innerHTML = ''; host.appendChild(box);
+      } catch { host.innerHTML = ''; }
+    }, 220);
+  }
+
+  document.getElementById('addDay').onclick = () => { plan.push(blankDay(plan.length + 1)); renderPlan(); };
+  document.getElementById('sample').onclick = () => {
+    seq = 0;
+    plan = [
+      { id: ++seq, date: iso(1), regions: [
+        { code: '11110', label: '서울 종로구', lat: 37.57477, lon: 126.97961 },
+        { code: '11140', label: '서울 중구', lat: 37.56381, lon: 126.99756 }] },
+      { id: ++seq, date: iso(2), regions: [
+        { code: '51150', label: '강원 강릉시', lat: 37.75211, lon: 128.87591 }] },
+      { id: ++seq, date: iso(3), regions: [
+        { code: '26350', label: '부산 해운대구', lat: 35.16307, lon: 129.1636 },
+        { code: '26380', label: '부산 사하구', lat: 35.10445, lon: 128.97493 }] },
+    ];
+    renderPlan();
+  };
+
+  document.getElementById('run').onclick = async () => {
+    const out = document.getElementById('out'), btn = document.getElementById('run');
+    if (!plan.length) return fail(out, '일정이 비어 있습니다. 날짜를 먼저 추가하세요.');
+    const empty = plan.find((d) => !d.regions.length);
+    if (empty) return fail(out, `${empty.date}에 시군구가 없습니다. 최소 한 곳은 넣어 주세요.`);
+
+    btn.disabled = true; btn.innerHTML = `<span class="spinner"></span>예보 불러오는 중`;
+    try {
+      const r = await fetch('/score/trip', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ days: plan.map((d) => ({ date: d.date, regions: d.regions.map((x) => x.code) })) }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.detail || '점수를 내지 못했습니다');
+      renderTripResult(data);
+    } catch (err) {
+      fail(out, err.message || '서버에 연결하지 못했습니다.');
+    } finally { btn.disabled = false; btn.textContent = '점수 내기'; }
+  };
+  function fail(host, msg) { host.innerHTML = `<div class="error">${esc(msg)}</div>`; }
+
+  function bar(weights, sub, size) {
+    const segs = COMPONENTS.map((c) => {
+      const w = weights?.[c] ?? 0, s = sub?.[c];
+      if (w <= 0) return '';
+      const pct = s == null ? '' : `<span class="pct">${Math.round(s * 100)}</span>`;
+      const fill = s == null ? `<div class="fill na"></div>` : `<div class="fill" data-h="${(s * 100).toFixed(1)}" style="background:var(--c-${c})"></div>`;
+      return `<div class="seg" style="flex:${w} 1 0" title="${KO[c]} · 비중 ${(w * 100).toFixed(0)}% · 스트레스 ${s == null ? '결측' : s.toFixed(2)}">${pct}${fill}</div>`;
+    }).join('');
+    const legend = COMPONENTS.map((c) => {
+      const w = weights?.[c] ?? 0; if (w <= 0) return '';
+      return `<div class="lg-item" style="flex:${w} 1 0"><div class="sw" style="background:var(--c-${c})"></div><div class="nm">${KO[c]}</div><div class="wt">${(w * 100).toFixed(0)}%</div></div>`;
+    }).join('');
+    return `<div class="bar ${size}">${segs}</div><div class="legend">${legend}</div>`;
+  }
+  function animateBars(root) {
+    requestAnimationFrame(() => {
+      root.querySelectorAll('.fill[data-h]').forEach((el, i) => setTimeout(() => { el.style.height = el.dataset.h + '%'; }, i * 35));
+    });
+  }
+  function tripBar(days) {
+    const W = {}, S = {}; let n = 0;
+    days.forEach((d) => d.regions.forEach((r) => {
+      if (r.score == null) return; n++;
+      COMPONENTS.forEach((c) => {
+        const w = r.weights_used?.[c]; if (w == null) return;
+        W[c] = (W[c] || 0) + w; S[c] = (S[c] || 0) + w * (r.subindices[c] ?? 0);
+      });
+    }));
+    if (!n) return '';
+    const weights = {}, sub = {};
+    COMPONENTS.forEach((c) => { if (!W[c]) return; weights[c] = W[c] / n; sub[c] = (S[c] / n) / weights[c]; });
+    return bar(weights, sub, 'lg');
+  }
+
+  function renderTripResult(data) {
+    const out = document.getElementById('out'), sum = data.summary;
+    document.getElementById('variantLabel').textContent = data.variant + ' 가중치';
+    if (sum.trip_score == null) return fail(out, '모든 일정이 예보 범위를 벗어났거나 관측 영역이 부족합니다.');
+
+    const fix = sum.fixable.length ? `
+      <div class="fixbox">
+        <h3>이 지역들은 날짜를 옮기면 올라갑니다</h3>
+        ${sum.fixable.map((f) => `<div class="fixrow">
+          <span><span class="lbl">${esc(f.label)}</span> <span class="when">${f.date.slice(5)} · ${f.score}점</span></span>
+          <span class="to">${f.best_alternative.date.slice(5)}로 옮기면 <b>${f.best_alternative.score}</b> (+${f.best_alternative.gain})</span>
+        </div>`).join('')}
+      </div>` : '';
+
+    const days = data.days.map((d, i) => {
+      const regions = d.regions.map((r) => {
+        if (r.score == null) return `<div class="regrow">
+          <header><div><span class="ord">${r.order}</span><h4 style="display:inline">${esc(r.label)}</h4></div>
+          <div class="sc">—<small>점수 없음</small></div></header>
+          <div class="flag">${esc(r.note)}</div></div>`;
+        const top = r.top_component;
+        const alts = r.alternatives.length ? `<div class="alts">더 좋은 날 ${r.alternatives.map((a) => `<span class="a">${a.date.slice(5)} <b>${a.score}</b> (+${a.gain})</span>`).join('')}</div>` : '';
+        const flag = r.missing.length ? `<div class="flag">${r.missing.map((c) => KO[c]).join('·')} 결측 — 나머지 영역으로 가중치를 재정규화했습니다.</div>` : '';
+        return `<div class="regrow">
+          <header>
+            <div><span class="ord">${r.order}</span><h4 style="display:inline">${esc(r.name)}</h4>
+              <span class="grp">${r.region_group}</span>
+              <div style="font-size:10.5px;color:var(--ink-muted);margin-top:3px">${esc(r.label)}</div></div>
+            <div class="sc">${r.score}<small>${r.grade}</small></div>
+          </header>
+          <div class="why">${top ? `<span>감점 1위 <b>${KO[top.component]}</b> ${Math.round(top.share * 100)}%</span>` : ''}</div>
+          <details class="bar-detail"><summary>요소별 자세히 보기</summary>${bar(r.weights_used, r.subindices, 'sm')}</details>
+          ${alts}${flag}</div>`;
+      }).join('');
+      return `<div class="dayblock">
+        <header><h3>${i + 1}일차 · ${d.date} <span style="font-weight:400;color:var(--ink-muted);font-size:11px">${d.regions.length}곳</span></h3>
+          <div class="dsc">${d.score ?? '—'}<small>${d.grade ?? ''}</small></div></header>
+        ${regions}</div>`;
+    }).join('');
+
+    out.innerHTML = `
+      <div class="headline">
+        <div><div class="score-big">${sum.trip_score}<span class="of"> /100</span></div>
+          <div class="grade">${sum.grade}</div></div>
+        <div>
+          <p class="method">${esc(data.method || '')}</p>
+          <details class="bar-detail"><summary>요소별 자세히 보기</summary>${tripBar(data.days)}</details>
+        </div>
+      </div>
+      ${fix}
+      ${days}
+      <p class="foot-note">지역-일 ${sum.region_day_count}건 · 단순 평균 ${sum.region_day_mean}점 ·
+        가장 낮은 곳 ${esc(sum.worst?.label ?? '—')} ${sum.worst?.score ?? ''}점</p>`;
+    animateBars(out);
+  }
+
+  /* ================================================================ 모드 전환 */
+  let currentMode = 'weather';
+
+  function applyModeUI(mode) {
+    const isTrip = mode === 'trip';
+    pageTitle.textContent = isTrip ? '여행 일정 날씨 점수' : '오늘의 날씨 점수 — 내 주변';
+    heroCard.style.display = isTrip ? 'none' : '';
+    rangePanel.style.display = isTrip ? 'none' : (userLat !== null ? 'block' : 'none');
+    tripInputPanel.style.display = isTrip ? 'block' : 'none';
+    tripResultsPanel.style.display = isTrip ? 'block' : 'none';
+    if (isTrip) statusEl.style.display = 'none';
+    modeToggleBtn.textContent = isTrip ? '오늘의 날씨 점수 보기 →' : '여행 일정 날씨 점수 짜보기 →';
+  }
+
+  function switchMode(mode) {
+    if (mode === currentMode || !map) { if (map) applyModeUI(mode); return; }
+    currentMode = mode;
+    if (mode === 'trip') {
+      clearOverlays();
+      if (!plan.length) { plan.push(blankDay(1)); }
+      renderPlan();
+    } else {
+      clearTripOverlays();
+      if (userLat !== null) renderNearby(lastRangeCount);
+      else locateAndShowWeather(); // 여행 모드로 바로 시작해서 위치를 아직 못 잡았을 때
+    }
+    applyModeUI(mode);
+    const url = new URL(location.href);
+    if (mode === 'trip') url.searchParams.set('mode', 'trip'); else url.searchParams.delete('mode');
+    history.replaceState(null, '', url);
+  }
+  window.switchMode = switchMode;
+  modeToggleBtn.addEventListener('click', () => switchMode(currentMode === 'trip' ? 'weather' : 'trip'));
+
+  /* ================================================================ 초기화 */
+  map = new kakao.maps.Map(document.getElementById('map'), { center: new kakao.maps.LatLng(36.5, 127.8), level: 12 });
+
+  const initialMode = new URLSearchParams(location.search).get('mode') === 'trip' ? 'trip' : 'weather';
+  currentMode = initialMode;
+  applyModeUI(initialMode);
+
+  if (initialMode === 'trip') {
+    statusEl.style.display = 'none';
+    plan.push(blankDay(1));
+    renderPlan();
+  } else {
+    locateAndShowWeather();
+  }
+})();
+</script>
+</body>
+</html>
