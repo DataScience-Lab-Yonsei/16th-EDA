@@ -1,0 +1,3 @@
+﻿crime_subgroup,crime_label,n,suspended_n,suspended_rate,factor_reliable_n,bac_known_n,injury_weeks_known_n,settlement_n,settlement_rate,settlement_label,damage_recovery_n,damage_recovery_rate,damage_recovery_label,remorse_n,remorse_rate,remorse_label,no_prior_n,no_prior_rate,no_prior_label,same_prior_n,same_prior_rate,same_prior_label,high_road_risk_n,high_road_risk_rate,high_road_risk_label
+drunk_driving,음주운전,26,7,0.2692307692307692,17,6,3,1,0.058823529411764705,합의·처벌불원,2,0.11764705882352941,피해회복,7,0.4117647058823529,반성,3,0.17647058823529413,초범·전과 없음,6,0.35294117647058826,동종전과·누범,3,0.17647058823529413,고위험 도로행위·사고
+hit_run_injury,도주치상,7,3,0.42857142857142855,5,1,2,3,0.6,합의·처벌불원,0,0.0,피해회복,1,0.2,반성,0,0.0,초범·전과 없음,2,0.4,동종전과·누범,2,0.4,고위험 도로행위·사고

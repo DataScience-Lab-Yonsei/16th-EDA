@@ -1,0 +1,7 @@
+﻿crime_subgroup,crime_label,lawyer,lawyer_label,n,suspended_n,suspended_rate,wilson_95_low,wilson_95_high
+drunk_driving,음주운전,lawfirm,법무법인,10,2,0.2,0.056680947980693314,0.5098431532792765
+drunk_driving,음주운전,lawyer,개인변호사,10,4,0.4,0.16817758120350967,0.6873304525498135
+drunk_driving,음주운전,public,국선,6,1,0.16666666666666666,0.03005258587173032,0.563509436563646
+hit_run_injury,도주치상,lawfirm,법무법인,2,1,0.5,0.09452865480086614,0.9054713451991339
+hit_run_injury,도주치상,lawyer,개인변호사,2,0,0.0,0.0,0.6576280471103807
+hit_run_injury,도주치상,public,국선,3,2,0.6666666666666666,0.2076549551264879,0.9385096847238394

@@ -1,0 +1,11 @@
+이 공유본에는 원자료와 분석 산출물이 포함되어 있지 않습니다.
+
+제외 항목
+- crime.zip 및 원문 판결문
+- data/interim, data/processed의 parquet 파일
+- results의 CSV, PNG, PDF, Markdown 결과
+- .venv 가상환경
+- 최종 Word, PDF, PowerPoint 파일
+
+실행하려면 제공받은 crime.zip을 다음 위치에 두십시오.
+data/raw/crime.zip

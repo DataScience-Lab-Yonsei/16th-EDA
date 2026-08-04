@@ -1,0 +1,11 @@
+pandas
+numpy
+pyarrow
+kiwipiepy
+scipy
+statsmodels
+matplotlib
+seaborn
+ruptures
+openpyxl
+tqdm

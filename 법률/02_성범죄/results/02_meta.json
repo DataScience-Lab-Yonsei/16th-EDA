@@ -1,0 +1,47 @@
+{
+  "n_reg": 79,
+  "outcome_rate": 0.5569620253164557,
+  "lawyer_counts": {
+    "lawfirm": 38,
+    "lawyer": 26,
+    "public": 15
+  },
+  "models": [
+    {
+      "model": "A_minimal",
+      "n": 79,
+      "pseudo_r2": 0.0743,
+      "llr_p": 0.3276458567498878
+    },
+    {
+      "model": "B_extended",
+      "n": 79,
+      "pseudo_r2": 0.1021,
+      "llr_p": 0.35143314471475956
+    },
+    {
+      "model": "C_with_year",
+      "n": 64,
+      "pseudo_r2": 0.1043,
+      "llr_p": 0.4056622383461791
+    },
+    {
+      "model": "E_ref_private",
+      "n": 79,
+      "pseudo_r2": 0.0743,
+      "llr_p": 0.327645766988745
+    },
+    {
+      "model": "D_agree_on_lawyer",
+      "n": 79,
+      "pseudo_r2": 0.1909,
+      "llr_p": 0.004592094449432234
+    },
+    {
+      "model": "F_suspended_only",
+      "n": 79,
+      "pseudo_r2": 0.0117,
+      "llr_p": 0.9894544971015484
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+key,label_old,label_new,old_pattern,new_pattern
+hayeot,하였-,했-,하였,했
+doeeot,되었-,됐-,되었,됐
+hayeya,하여야,해야,하여야,해야
+doeeo,되어,돼,되어,돼
+negative_long,하지 아니하-,하지 않-,하지\s*아니하,하지\s*않
+negative_lexeme,아니하-,않-,아니하,않
