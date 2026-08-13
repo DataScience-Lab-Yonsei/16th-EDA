@@ -1,0 +1,20 @@
+# 데이터 — 원본 2.5GB, Parquet 374MB. 저장소에 커밋 금지.
+# 원본은 Kaggle 에서 재취득 가능:
+#   mkechinov/ecommerce-events-history-in-cosmetics-shop
+#   mkechinov/ecommerce-events-history-in-electronics-store
+data/
+
+# 리포트에 딸린 그림은 재생성 가능
+outputs/figures/
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# OS / 에디터
+.DS_Store
+.vscode/
+.idea/

@@ -1,0 +1,9 @@
+﻿model,outcome,formula,n,events,non_events,parameter_count_approx,events_per_parameter,status,converged,warning
+A1_basic_suspension,outcome_suspended,"outcome_suspended ~ C(lawyer, Treatment(reference='public')) + C(crime_subgroup) + decision_year",33,10,23,5,2.0,fitted,True,최소 결과셀 기준 사건/모수비 < 5: 심한 과적합 위험
+A1_factor_control,outcome_suspended,"outcome_suspended ~ C(lawyer, Treatment(reference='public')) + C(crime_subgroup) + settlement + same_prior + high_road_risk",22,9,13,7,1.2857142857142858,fitted,True,최소 결과셀 기준 사건/모수비 < 5: 심한 과적합 위험
+A1_enhanced_favorable_factors,outcome_suspended,"outcome_suspended ~ C(lawyer, Treatment(reference='public')) + C(crime_subgroup) + settlement + same_prior + high_road_risk + damage_recovery + remorse + no_prior",22,9,13,10,0.9,nonconverged,False,Maximum Likelihood optimization failed to converge. Check mle_retvals | 최소 결과셀 기준 사건/모수비 < 5: 심한 과적합 위험
+A2_settlement,settlement,"settlement ~ C(lawyer, Treatment(reference='public')) + C(crime_subgroup) + same_prior + high_road_risk",22,4,18,7,0.5714285714285714,nonconverged,False,Maximum Likelihood optimization failed to converge. Check mle_retvals | 최소 결과셀 기준 사건/모수비 < 5: 심한 과적합 위험
+A3_strict_suspension_robustness,outcome_suspended,"outcome_suspended ~ C(lawyer, Treatment(reference='public'))",16,4,12,3,1.3333333333333333,fitted,True,최소 결과셀 기준 사건/모수비 < 5: 심한 과적합 위험
+A3_reduced_or_suspended,outcome_han,"outcome_han ~ C(lawyer, Treatment(reference='public')) + C(crime_subgroup)",4,4,0,4,0.0,not_fitted,,표본 또는 결과의 0/1 변이가 부족함
+X1_high_road_risk,outcome_suspended,outcome_suspended ~ high_road_risk,22,9,13,2,4.5,fitted,True,최소 결과셀 기준 사건/모수비 < 5: 심한 과적합 위험
+X2_crime_subgroup,outcome_suspended,outcome_suspended ~ C(crime_subgroup),33,10,23,2,5.0,fitted,True,

@@ -1,0 +1,10 @@
+﻿sex_type,lawyer,count,mean
+indecent,public,5,0.4
+indecent,lawyer,7,0.14285714285714285
+indecent,lawfirm,12,0.5833333333333334
+rape,public,6,0.6666666666666666
+rape,lawyer,9,0.7777777777777778
+rape,lawfirm,15,0.7333333333333333
+camera,public,4,0.75
+camera,lawyer,10,0.5
+camera,lawfirm,11,0.36363636363636365

@@ -1,0 +1,55 @@
+[교통범죄 확장분석 실행 결과]
+
+{
+  "broad_n": 33,
+  "strict_n": 16,
+  "factor_reliable_n": 22,
+  "broad_suspended_n": 10,
+  "strict_suspended_n": 4,
+  "fitted_models_n": 5,
+  "significant_non_intercept_n": 0
+}
+
+[모형 진단]
+                          model  n  events  non_events  events_per_parameter       status                                                                                                 warning
+            A1_basic_suspension 33      10          23              2.000000       fitted                                                                         최소 결과셀 기준 사건/모수비 < 5: 심한 과적합 위험
+              A1_factor_control 22       9          13              1.285714       fitted                                                                         최소 결과셀 기준 사건/모수비 < 5: 심한 과적합 위험
+  A1_enhanced_favorable_factors 22       9          13              0.900000 nonconverged Maximum Likelihood optimization failed to converge. Check mle_retvals | 최소 결과셀 기준 사건/모수비 < 5: 심한 과적합 위험
+                  A2_settlement 22       4          18              0.571429 nonconverged Maximum Likelihood optimization failed to converge. Check mle_retvals | 최소 결과셀 기준 사건/모수비 < 5: 심한 과적합 위험
+A3_strict_suspension_robustness 16       4          12              1.333333       fitted                                                                         최소 결과셀 기준 사건/모수비 < 5: 심한 과적합 위험
+        A3_reduced_or_suspended  4       4           0              0.000000   not_fitted                                                                                   표본 또는 결과의 0/1 변이가 부족함
+              X1_high_road_risk 22       9          13              4.500000       fitted                                                                         최소 결과셀 기준 사건/모수비 < 5: 심한 과적합 위험
+              X2_crime_subgroup 33      10          23              5.000000       fitted                                                                                                        
+
+[정상 수렴 모형의 비절편 결과]
+                          model                                                term        OR  CI_lower   CI_upper  p_value
+            A1_basic_suspension  C(lawyer, Treatment(reference='public'))[T.lawyer]  1.157381  0.173886   7.703511 0.879874
+            A1_basic_suspension C(lawyer, Treatment(reference='public'))[T.lawfirm]  0.716730  0.098603   5.209791 0.742089
+            A1_basic_suspension                 C(crime_subgroup)[T.hit_run_injury]  2.012898  0.343690  11.789003 0.437919
+            A1_basic_suspension                                       decision_year  1.035965  0.785182   1.366846 0.802703
+              A1_factor_control  C(lawyer, Treatment(reference='public'))[T.lawyer]  7.573380  0.335677 170.866818 0.202877
+              A1_factor_control C(lawyer, Treatment(reference='public'))[T.lawfirm]  0.538328  0.034631   8.368239 0.658212
+              A1_factor_control                 C(crime_subgroup)[T.hit_run_injury]  4.053449  0.180292  91.132286 0.378183
+              A1_factor_control                                          settlement  1.057330  0.031133  35.909121 0.975274
+              A1_factor_control                                          same_prior  0.102510  0.005263   1.996757 0.132708
+              A1_factor_control                                      high_road_risk 20.414599  0.766410 543.776627 0.071687
+A3_strict_suspension_robustness  C(lawyer, Treatment(reference='public'))[T.lawyer]  1.333333  0.057125  31.121019 0.857948
+A3_strict_suspension_robustness C(lawyer, Treatment(reference='public'))[T.lawfirm]  1.600000  0.103629  24.703486 0.736436
+              X1_high_road_risk                                      high_road_risk  9.600000  0.847709 108.716559 0.067769
+              X2_crime_subgroup                 C(crime_subgroup)[T.hit_run_injury]  2.035714  0.361014  11.479152 0.420540
+
+[Fisher 정확검정]
+        scope               comparison  n  exposed_rate  reference_rate       OR  p_value
+   양형이유 신뢰 표본     유리한 양형사유 1개 이상 vs 없음 22      0.416667        0.400000 1.071429 1.000000
+   양형이유 신뢰 표본         합의·처벌불원 기재 vs 없음 22      0.500000        0.388889 1.571429 1.000000
+   양형이유 신뢰 표본            피해회복 기재 vs 없음 22      0.500000        0.400000 1.500000 1.000000
+   양형이유 신뢰 표본              반성 기재 vs 없음 22      0.250000        0.500000 0.333333 0.380186
+   양형이유 신뢰 표본        초범·전과 없음 기재 vs 없음 22      0.000000        0.473684 0.000000 0.240260
+   양형이유 신뢰 표본         동종전과·누범 기재 vs 없음 22      0.250000        0.500000 0.333333 0.380186
+   양형이유 신뢰 표본     고위험 도로행위·사고 기재 vs 없음 22      0.800000        0.294118 9.600000 0.115858
+        광의 표본             도주치상 vs 음주운전 33      0.428571        0.269231 2.035714 0.645555
+  BAC 추출 음주운전 BAC 0.20% 이상 vs 0.20% 미만  6      0.000000        0.250000 0.000000 1.000000
+   광의 표본·집행유예              개인변호사 vs 국선 21      0.333333        0.333333 1.000000 1.000000
+   광의 표본·집행유예               법무법인 vs 국선 21      0.250000        0.333333 0.666667 1.000000
+양형이유 신뢰 표본·합의              개인변호사 vs 국선 14      0.200000        0.222222 0.875000 1.000000
+양형이유 신뢰 표본·합의               법무법인 vs 국선 17      0.125000        0.222222 0.500000 1.000000
